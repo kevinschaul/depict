@@ -1,6 +1,8 @@
 # Depict
 
-Depict aims to easily render fallback .png images for d3 visualizations. (IE 8, I'm looking at you.)
+Depict aims to easily render fallback images for d3 visualizations. (IE 8, I'm looking at you.)
+
+If this could happen automagically, charts based on living data could be rendered into flat images at regular intervals, no human interaction required. Think jobs numbers, congressional votes, etc.
 
 There are many directions this project could go in, so please [open up an issue](https://github.com/kevinschaul/depict/issues) to start a conversation.
 
