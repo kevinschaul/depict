@@ -4,6 +4,8 @@ Depict aims to easily render fallback images for d3 visualizations. (IE 8, I'm l
 
 If this could happen automagically, charts based on living data could be rendered into flat images at regular intervals, no human interaction required. Think jobs numbers, congressional votes, etc.
 
+Important issue: [Would a general website screenshot tool me more useful?](https://github.com/kevinschaul/depict/issues/1)
+
 There are many directions this project could go in, so please [open up an issue](https://github.com/kevinschaul/depict/issues) to start a conversation.
 
 ## Installation
