@@ -1,11 +1,21 @@
 # Depict
 
-## Setup
+Depict aims to easily render fallback .png images for d3 visualizations. (IE 8, I'm looking at you.)
+
+There are many directions this project could go in, so please [open up an issue](https://github.com/kevinschaul/depict/issues) to start a conversation.
+
+## Installation
+
+Only tested on OS X
 
     brew install librsvg
-    brew install imagemagick # Maybe not necessary anymore?
+    npm install -g depict # Global install is necessary for command-line access
 
 ## Procedure
+
+`depict-init` will create an example project in the current directory.
+
+    depict-init
 
 Write a function in `chart.js` with the following definition:
     
@@ -15,13 +25,11 @@ Write a function in `chart.js` with the following definition:
 
 Use the `depict` script to create an output `.png` image of the graphic:
 
-    ./depict.js test.png
+    depict chart.png
 
 ## Pain points
 
 - All svg styles must be inline for the current rendering program to use them. Can some sort of utility convert css to a series of d3.selectAll().style() commands?
-
-## Ideas
-
-There should be a command to generate a basic index.html and chart.js in the current wrking directory.
+- Paths for `depict-init` probably only work on npm installations with default settings.
+- Installation. Without librsvg, `depict` with throw cryptic errors.
 

@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+
+var fs = require('fs');
+var optimist = require('optimist');
+var open = require('open');
+
+var argv = optimist
+  .usage('Usage: depict-init')
+  .options('h', {
+    alias: 'help',
+    describe: 'Display help',
+    default: false
+  })
+  .argv;
+
+if (argv.h || argv.help) return optimist.showHelp();
+
+var prefix = '/usr/local/';
+
+var index = fs.readFileSync(prefix + 'lib/node_modules/depict/src/index.html');
+fs.writeFileSync('index.html', index);
+
+var jobs = fs.readFileSync(prefix + 'lib/node_modules/depict/src/jobs.js');
+fs.writeFileSync('jobs.js', jobs);
+
+var chart = fs.readFileSync(prefix + 'lib/node_modules/depict/src/chart.js');
+fs.writeFileSync('chart.js', chart);
+
+if (!fs.existsSync('lib')) {
+    fs.mkdirSync('lib');
+}
+var jquery = fs.readFileSync(prefix + 'lib/node_modules/depict/node_modules/jquery/tmp/jquery.js');
+fs.writeFileSync('lib/jquery.js', jquery);
+
+var d3 = fs.readFileSync(prefix + 'lib/node_modules/depict/node_modules/d3/d3.min.js');
+fs.writeFileSync('lib/d3.min.js', d3);
+
+open('index.html');
+

@@ -6,7 +6,7 @@ var jsdom = require('jsdom');
 var optimist = require('optimist');
 
 var argv = optimist
-  .usage('Usage: node depict.js FILE')
+  .usage('Usage: depict FILE')
   .options('h', {
     alias: 'help',
     describe: 'Display help',
@@ -41,11 +41,13 @@ process.stdout.on('data', function(data) {
 
 var html = '<div id="target"></div>';
 
+var prefix = '/usr/local/';
+var cwd = process.cwd() + '/';
 var scripts = [
-  'node_modules/d3/d3.min.js',
-  'node_modules/jquery/tmp/jquery.js',
-  'src/data/jobs.js',
-  'src/chart.js'
+  prefix + 'lib/node_modules/depict/node_modules/d3/d3.min.js',
+  prefix + 'lib/node_modules/depict/node_modules/jquery/tmp/jquery.js',
+  cwd + 'jobs.js',
+  cwd + 'chart.js'
 ];
 
 if (size) {
@@ -54,14 +56,8 @@ if (size) {
   var width = parts[1];
 }
 
-// Read css from disk
-var css = [];
-css.push('<style>\n');
-css.push(fs.readFileSync('chart.css', 'utf8'));
-css.push('</style>');
-
 jsdom.env({
-  html: [html, css.join('')],
+  html: html,
   scripts: scripts,
   done: function(errors, window) {
     var $ = window.$;
