@@ -10,7 +10,7 @@ There are many directions this project could go in, so please [open up an issue]
 
 Only tested on OS X
 
-    brew install librsvg
+    brew install casperjs
     npm install -g depict # Global install is necessary for command-line access
 
 ## Procedure

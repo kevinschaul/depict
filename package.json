@@ -1,6 +1,6 @@
 {
   "name": "depict",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": {
     "name": "Kevin Schaul",
     "email": "kevin.schaul@gmail.com",
@@ -11,14 +11,6 @@
     "url": "https://github.com/kevinschaul/depict.git"
   },
   "bin": {
-    "depict": "./bin/depict",
-    "depict-init": "./bin/depict-init"
-  },
-  "dependencies": {
-    "jsdom": "~0.7.0",
-    "optimist": "~0.6.0",
-    "d3": "~3.2.4",
-    "jquery": "~1.8.3",
-    "open": "0.0.3"
+    "depict": "./bin/depict"
   }
 }

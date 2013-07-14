@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
 var child_process = require('child_process');
-var fs = require('fs');
-var jsdom = require('jsdom');
 var optimist = require('optimist');
 
 var argv = optimist
@@ -12,64 +10,18 @@ var argv = optimist
     describe: 'Display help',
     default: false
   })
-  .options('s', {
-    // TODO
-    alias: 'size',
-    describe: 'Dimensions of output image, in form `height,width`',
-    default: false
-  })
   .check(function(argv) {
-    if (argv._.length !== 1) throw new Error('FILE must be given.');
+    //if (argv._.length !== 1) throw new Error('FILE must be given.');
   })
   .argv;
 
 if (argv.h || argv.help) return optimist.showHelp();
 
-var out_file = argv._[0];
-var size = argv.s || argv.size;
+var args = [process.cwd() + '/src/depict-casperjs.js', 'http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html', '.g-us-map-grid', 'wine.png'];
 
-var convert_args = ['-o', out_file];
-var convert = child_process.spawn('rsvg-convert', convert_args);
+casper = child_process.spawn('casperjs', args);
 
-convert.stdout.on('data', function(data) {
-  process.stdout.write(data);
-});
-
-process.stdout.on('data', function(data) {
-  console.log(data);
-});
-
-var html = '<div id="target"></div>';
-
-var prefix = '/usr/local/';
-var cwd = process.cwd() + '/';
-var scripts = [
-  prefix + 'lib/node_modules/depict/node_modules/d3/d3.min.js',
-  prefix + 'lib/node_modules/depict/node_modules/jquery/tmp/jquery.js',
-  cwd + 'jobs.js',
-  cwd + 'chart.js'
-];
-
-if (size) {
-  var parts = size.split(',');
-  var height = parts[0];
-  var width = parts[1];
-}
-
-jsdom.env({
-  html: html,
-  scripts: scripts,
-  done: function(errors, window) {
-    var $ = window.$;
-
-    window.insertChart(window.jobs, width, height);
-
-    // Set `svgsrc`
-    var svgsrc = $('#target').html();
-
-    // Write to stdin, which convert is waiting to handle
-    convert.stdin.write(svgsrc);
-    convert.stdin.end();
-  }
+casper.stdout.on('data', function(data) {
+    process.stdout.write(data);
 });
 
