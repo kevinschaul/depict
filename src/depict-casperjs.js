@@ -17,11 +17,12 @@ var url = args[0];
 var selector = args[1];
 var outFile = args[2];
 
+console.log('\nRequesting ' + url + ' ' + selector);
 casper.start(url);
 
 casper.waitForSelector(selector, function() {
     this.captureSelector(outFile, selector);
-    console.log('Captured!');
+    console.log('Saved to ' + outFile);
 });
 
 casper.run();
