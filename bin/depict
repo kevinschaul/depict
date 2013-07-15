@@ -4,20 +4,32 @@ var child_process = require('child_process');
 var optimist = require('optimist');
 
 var argv = optimist
-  .usage('Usage: depict FILE')
+  .usage('Usage: depict URL OUT_FILE [-s SELECTOR]')
   .options('h', {
     alias: 'help',
     describe: 'Display help',
     default: false
   })
+  .options('s', {
+    alias: 'selector',
+    describe: 'CSS selector',
+    default: 'body'
+  })
   .check(function(argv) {
-    //if (argv._.length !== 1) throw new Error('FILE must be given.');
+    if (argv._.length !== 2) throw new Error('URL and OUT_FILE must be given.');
   })
   .argv;
 
 if (argv.h || argv.help) return optimist.showHelp();
 
-var args = [process.cwd() + '/src/depict-casperjs.js', 'http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html', '.g-us-map-grid', 'wine.png'];
+var url = argv._[0];
+var selector = argv.s || argv.selector;
+var out_file = argv._[1];
+
+// TODO This is the default node install location
+var prefix = '/usr/local/';
+
+var args = [prefix + '/lib/node_modules/depict/src/depict-casperjs.js', url, selector, out_file];
 
 casper = child_process.spawn('casperjs', args);
 

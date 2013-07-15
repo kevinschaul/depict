@@ -17,10 +17,6 @@ var url = args[0];
 var selector = args[1];
 var outFile = args[2];
 
-console.log(url);
-console.log(selector);
-console.log(outFile);
-
 casper.start(url);
 
 casper.waitForSelector(selector, function() {
