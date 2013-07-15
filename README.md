@@ -2,7 +2,7 @@
 
 Depict aims to easily render fallback images for complex visualizations. (IE 8, I'm looking at you.)
 
-Given a url and css selector, depict outputs a .png of the rendered element.
+Given a url and [css selector](http://www.w3.org/TR/selectors/#selectors), depict outputs a .png of the rendered element.
 
 With depict, charts based on living data can be rendered into flat images at regular intervals, no human interaction required. Think jobs numbers, congressional votes, etc.
 
