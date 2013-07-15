@@ -21,7 +21,7 @@ casper.start(url);
 
 casper.waitForSelector(selector, function() {
     this.captureSelector(outFile, selector);
-    console.log('caputured!');
+    console.log('Captured!');
 });
 
 casper.run();

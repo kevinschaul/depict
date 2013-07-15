@@ -12,5 +12,9 @@
   },
   "bin": {
     "depict": "./bin/depict"
+  },
+  "preferGlobal": true,
+  "dependencies": {
+    "optimist": "~0.6.0"
   }
 }

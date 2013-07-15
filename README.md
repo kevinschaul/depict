@@ -1,37 +1,42 @@
 # Depict
 
-Depict aims to easily render fallback images for d3 visualizations. (IE 8, I'm looking at you.)
+Depict aims to easily render fallback images for complex visualizations. (IE 8, I'm looking at you.)
 
-If this could happen automagically, charts based on living data could be rendered into flat images at regular intervals, no human interaction required. Think jobs numbers, congressional votes, etc.
+Given a url and css selector, depict outputs a .png of the rendered element.
 
-There are many directions this project could go in, so please [open up an issue](https://github.com/kevinschaul/depict/issues) to start a conversation.
+With depict, charts based on living data can be rendered into flat images at regular intervals, no human interaction required. Think jobs numbers, congressional votes, etc.
 
 ## Installation
 
-Only tested on OS X
+Depict requires [CasperJS](http://docs.casperjs.org/en/latest/installation.html), which can be installed on OS X via [Homebrew](http://brew.sh/).
 
     brew install casperjs
-    npm install -g depict # Global install is necessary for command-line access
 
-## Procedure
+Then, install depict from [npm](https://npmjs.org/package/depict). The global install is recommended for easy command-line access.
 
-`depict-init` will create an example project in the current directory.
+    npm install -g depict
 
-    depict-init
+## Usage
 
-Write a function in `chart.js` with the following definition:
-    
-    void window.insertChart(data);
+    Usage: depict URL OUT_FILE [-s SELECTOR]
 
-`insertChart` will create an svg element in the `#target` div, using the data, height and width specified in the configutation options.
+    Options:
+      -h, --help      Display help  [default: false]
+      -s, --selector  CSS selector  [default: "body"]
 
-Use the `depict` script to create an output `.png` image of the graphic:
+## Examples
 
-    depict chart.png
+For a specific chart:
 
-## Pain points
+    depict \
+    http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html \
+    -s '#g-chart-va' \
+    va-wine.png
 
-- All svg styles must be inline for the current rendering program to use them. Can some sort of utility convert css to a series of d3.selectAll().style() commands?
-- Paths for `depict-init` probably only work on npm installations with default settings.
-- Installation. Without librsvg, `depict` with throw cryptic errors.
+To render the full graphic:
+
+    depict \
+    http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html \
+    -s '#main' \
+    a-nation-of-wineries.png
 
