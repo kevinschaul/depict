@@ -21,6 +21,11 @@ console.log('\nRequesting ' + url + ' ' + selector);
 casper.start(url);
 
 casper.waitForSelector(selector, function() {
+    casper.evaluate(function(styleURL) {
+        var style = document.createElement('style');
+        style.appendChild(document.createTextNode('@import url("' + styleURL + '")'));
+        document.head.appendChild(style);
+    }, 'test.css');
     this.captureSelector(outFile, selector);
     console.log('Saved to ' + outFile);
 });
