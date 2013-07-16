@@ -50,6 +50,6 @@ To include a css file:
     depict \
     http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html \
     -s '.g-us-map-grid' \
-    us-wine.png
+    us-wine.png \
     -c exclude-ui.css
 
