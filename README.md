@@ -6,6 +6,10 @@ Given a url and [css selector](http://www.w3.org/TR/selectors/#selectors), depic
 
 With depict, charts based on living data can be rendered into flat images at regular intervals, no human interaction required. Think jobs numbers, congressional votes, etc.
 
+## Features
+
+- Include an extra css file before rendering, useful for hiding UI components that don't make sense for static images
+
 ## Installation
 
 Depict requires [CasperJS](http://docs.casperjs.org/en/latest/installation.html), which can be installed on OS X via [Homebrew](http://brew.sh/).
@@ -23,6 +27,7 @@ Then, install depict from [npm](https://npmjs.org/package/depict). The global in
     Options:
       -h, --help      Display help  [default: false]
       -s, --selector  CSS selector  [default: "body"]
+      -c, --css       CSS file to include in rendering  [default: false]
 
 ## Examples
 
@@ -39,4 +44,12 @@ To render the full graphic:
     http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html \
     -s '#main' \
     a-nation-of-wineries.png
+
+To include a css file:
+
+    depict \
+    http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html \
+    -s '.g-us-map-grid' \
+    us-wine.png
+    -c exclude-ui.css
 
