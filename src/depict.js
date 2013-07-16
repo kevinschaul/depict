@@ -38,10 +38,7 @@ if (css_file) {
     css_text = fs.readFileSync(css_file, 'utf8');
 }
 
-// TODO This is the default node install location
-var prefix = '/usr/local/';
-
-var args = [prefix + '/lib/node_modules/depict/src/depict-casperjs.js', url, selector, out_file];
+var args = [__dirname + '/depict-casperjs.js', url, selector, out_file];
 
 if (css_text) {
     args.push('--css', css_text);

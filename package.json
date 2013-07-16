@@ -1,6 +1,6 @@
 {
   "name": "depict",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": {
     "name": "Kevin Schaul",
     "email": "kevin.schaul@gmail.com",
@@ -11,7 +11,7 @@
     "url": "https://github.com/kevinschaul/depict.git"
   },
   "bin": {
-    "depict": "./bin/depict"
+    "depict": "./src/depict.js"
   },
   "preferGlobal": true,
   "dependencies": {
