@@ -5,7 +5,7 @@ var fs = require('fs');
 var optimist = require('optimist');
 
 var argv = optimist
-  .usage('Usage: depict URL OUT_FILE [-s SELECTOR]')
+  .usage('Usage: depict URL OUT_FILE [OPTIONS]')
   .options('h', {
     alias: 'help',
     describe: 'Display help',

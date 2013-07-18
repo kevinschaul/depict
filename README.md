@@ -22,7 +22,7 @@ Then, install depict from [npm](https://npmjs.org/package/depict). The global in
 
 ## Usage
 
-    Usage: depict URL OUT_FILE [-s SELECTOR]
+    Usage: depict URL OUT_FILE [OPTIONS]
 
     Options:
       -h, --help      Display help  [default: false]
