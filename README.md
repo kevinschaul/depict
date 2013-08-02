@@ -64,6 +64,11 @@ To include a css file:
 
 ## Pro tips
 
+Run a local webserver to use depict during development:
+
+    python -m SimpleHTTPServer 1337
+    depict http://0.0.0.0:1337 chart.png -s '#chart
+
 Add a line in your `Makefile` to run depict automatically. (You are [using make](http://bost.ocks.org/mike/make/), right?)
 
     fallback/chart.png: index.html
