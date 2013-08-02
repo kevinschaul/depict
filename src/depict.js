@@ -21,6 +21,11 @@ var argv = optimist
     describe: 'CSS file to include in rendering',
     default: false
   })
+  .options('H', {
+    alias: 'hide-selector',
+    describe: 'Hide attributes of this selector berore rendering.',
+    default: false
+  })
   .check(function(argv) {
     if (argv._.length !== 2) throw new Error('URL and OUT_FILE must be given.');
   })
@@ -36,6 +41,11 @@ var css_file = argv.c || argv.css;
 var css_text = '';
 if (css_file) {
     css_text = fs.readFileSync(css_file, 'utf8');
+}
+
+var hide_selector = argv.H || argv["hide-selector"];
+if (hide_selector) {
+  css_text += "\n\n " + hide_selector + " { display: none; }\n";
 }
 
 var args = [__dirname + '/depict-casperjs.js', url, selector, out_file];
