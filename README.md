@@ -28,6 +28,7 @@ Then, install depict from [npm](https://npmjs.org/package/depict). The global in
       -h, --help      Display help  [default: false]
       -s, --selector  CSS selector  [default: "body"]
       -c, --css       CSS file to include in rendering  [default: false]
+      -H, --hide-selector  Hide attributes of this selector berore rendering.  [default: false]
 
 ## Examples
 
@@ -45,6 +46,14 @@ To render the full graphic:
     -s '#main' \
     a-nation-of-wineries.png
 
+To hide certain components, such as UI elements:
+
+    depict \
+    http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html \
+    -s '.g-us-map-grid' \
+    us-wine.png \
+    -H '.g-us-map-slider'
+
 To include a css file:
 
     depict \
@@ -52,4 +61,19 @@ To include a css file:
     -s '.g-us-map-grid' \
     us-wine.png \
     -c exclude-ui.css
+
+## Pro tips
+
+Add a line in your `Makefile` to run depict automatically. (You are using Make, right?)
+
+    fallback/chart.png: index.html
+    depict http://0.0.0.0:1337 $@ -s '#chart'
+
+Hide multiple css selectors by using commas:
+
+    depict \
+    http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html \
+    -s '.g-us-map-grid' \
+    us-wine.png \
+    -H '.g-us-map-slider, .g-map-legend-click'
 
