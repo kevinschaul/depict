@@ -1,10 +1,10 @@
 {
   "name": "depict",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": {
     "name": "Kevin Schaul",
     "email": "kevin.schaul@gmail.com",
-    "url": "http://www.kevinschaul.com"
+    "url": "http://kevin.schaul.io"
   },
   "repository": {
     "type": "git",
