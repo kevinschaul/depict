@@ -64,7 +64,7 @@ To include a css file:
 
 ## Pro tips
 
-Add a line in your `Makefile` to run depict automatically. (You are using Make, right?)
+Add a line in your `Makefile` to run depict automatically. (You are [using make](http://bost.ocks.org/mike/make/), right?)
 
     fallback/chart.png: index.html
     depict http://0.0.0.0:1337 $@ -s '#chart'
