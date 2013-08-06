@@ -34,16 +34,19 @@ var argv = optimist
 
 if (argv.h || argv.help) return optimist.showHelp();
 
+// TODO append 'http://' if protocol not specified
 var url = argv._[0];
 var selector = argv.s || argv.selector;
 var out_file = argv._[1];
 
+// TODO implement
 var css_file = argv.c || argv.css;
 var css_text = '';
 if (css_file) {
     css_text = fs.readFileSync(css_file, 'utf8');
 }
 
+// TODO implement
 var hide_selector = argv.H || argv["hide-selector"];
 if (hide_selector) {
   css_text += "\n\n " + hide_selector + " { display: none; }\n";
@@ -51,29 +54,24 @@ if (hide_selector) {
 
 phantom.create(function(ph) {
   ph.createPage(function(page) {
-    page.open('http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html',
-        function(status) {
-      console.log(this);
-      console.log(status);
-      page.set('clipRect', { top: 200, left: 10, width: 950, height: 600 });
-      page.render('out.png', function() {
-        console.log('done!');
-      });
+    console.log('Requesting', url);
+    page.open(url, function(status) {
+      // TODO filter out console.log errors of requested page
+      console.log('opened.');
+      page.evaluate(function(selector) {
+        var element = document.querySelector(selector);
+        return element.getBoundingClientRect();
+      },
+      function(rect) {
+        page.set('clipRect', rect);
+        page.render(out_file, function() {
+          console.log('done!');
+          ph.exit();
+        });
+      },
+      selector
+      );
     });
   });
 });
-
-/*
-var args = [__dirname + '/depict-casperjs.js', url, selector, out_file];
-
-if (css_text) {
-    args.push('--css', css_text);
-}
-
-casper = child_process.spawn('casperjs', args);
-
-casper.stdout.on('data', function(data) {
-    process.stdout.write(data);
-});
-*/
 
