@@ -36,23 +36,24 @@ if (argv.h || argv.help) return optimist.showHelp();
 
 // TODO append 'http://' if protocol not specified
 var url = argv._[0];
+
 var selector = argv.s || argv.selector;
 var out_file = argv._[1];
 
-// TODO implement
 var css_file = argv.c || argv.css;
 var css_text = '';
 if (css_file) {
     css_text = fs.readFileSync(css_file, 'utf8');
 }
 
-// TODO implement
 var hide_selector = argv.H || argv["hide-selector"];
 if (hide_selector) {
   css_text += "\n\n " + hide_selector + " { display: none; }\n";
 }
 
-function depict(url, out_file, selector) {
+function depict(url, out_file, selector, css_text) {
+  // phantomjs heavily relies on callback functions
+
   var page;
   var ph;
 
@@ -67,16 +68,21 @@ function depict(url, out_file, selector) {
 
   function openPage(_page) {
     page = _page;
-    // TODO Add option to show errors?
     page.set('onError', function() { return; });
     page.open(url, prepForRender);
   }
 
   function prepForRender(status) {
-    page.evaluate(runInPhantomBrowser, renderImage, selector);
+    page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
   }
 
-  function runInPhantomBrowser(selector) {
+  function runInPhantomBrowser(selector, css_text) {
+    if (css_text) {
+      var style = document.createElement('style');
+      style.appendChild(document.createTextNode(css_text));
+      document.head.appendChild(style);
+    }
+
     var element = document.querySelector(selector);
     return element.getBoundingClientRect();
   }
@@ -92,5 +98,5 @@ function depict(url, out_file, selector) {
   }
 }
 
-depict(url, out_file, selector);
+depict(url, out_file, selector, css_text);
 
