@@ -52,26 +52,45 @@ if (hide_selector) {
   css_text += "\n\n " + hide_selector + " { display: none; }\n";
 }
 
-phantom.create(function(ph) {
-  ph.createPage(function(page) {
-    console.log('Requesting', url);
-    page.open(url, function(status) {
-      // TODO filter out console.log errors of requested page
-      console.log('opened.');
-      page.evaluate(function(selector) {
-        var element = document.querySelector(selector);
-        return element.getBoundingClientRect();
-      },
-      function(rect) {
-        page.set('clipRect', rect);
-        page.render(out_file, function() {
-          console.log('done!');
-          ph.exit();
-        });
-      },
-      selector
-      );
-    });
-  });
-});
+function depict(url, out_file, selector) {
+  var page;
+  var ph;
+
+  console.log('\nRequesting', url);
+
+  phantom.create(createPage)
+
+  function createPage(_ph) {
+    ph = _ph;
+    ph.createPage(openPage);
+  }
+
+  function openPage(_page) {
+    page = _page;
+    // TODO Add option to show errors?
+    page.set('onError', function() { return; });
+    page.open(url, prepForRender);
+  }
+
+  function prepForRender(status) {
+    page.evaluate(runInPhantomBrowser, renderImage, selector);
+  }
+
+  function runInPhantomBrowser(selector) {
+    var element = document.querySelector(selector);
+    return element.getBoundingClientRect();
+  }
+
+  function renderImage(rect) {
+    page.set('clipRect', rect);
+    page.render(out_file, cleanup);
+  }
+
+  function cleanup() {
+    console.log('Saved imaged to', out_file);
+    ph.exit();
+  }
+}
+
+depict(url, out_file, selector);
 
