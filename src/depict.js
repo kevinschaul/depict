@@ -34,8 +34,11 @@ var argv = optimist
 
 if (argv.h || argv.help) return optimist.showHelp();
 
-// TODO append 'http://' if protocol not specified
+// Append 'http://' if protocol not specified
 var url = argv._[0];
+if (!url.match(/^\w+:\/\//)) {
+  url = 'http://' + url;
+}
 
 var selector = argv.s || argv.selector;
 var out_file = argv._[1];
