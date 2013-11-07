@@ -85,6 +85,7 @@ function depict(url, out_file, selector, css_text) {
   function openPage(_page) {
     page = _page;
     page.set('onError', function() { return; });
+    page.onConsoleMessage = function (msg) { console.log(msg); };
     page.open(url, prepForRender);
     page.set('viewportSize', {width: viewport_width, height: 900}); // The height isn't taken into account here but phantomjs requires an object with both a width and a height.
   }
