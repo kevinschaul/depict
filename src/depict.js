@@ -27,6 +27,16 @@ var argv = optimist
     describe: 'Hide attributes of this selector berore rendering.',
     default: false
   })
+  .options('w', {
+    alias: 'browser-width',
+    describe: 'Specify the desired browser width.',
+    default: 1440
+  })
+  .options('d', {
+    alias: 'delay',
+    describe: 'Specify a delay time, in milliseconds.',
+    default: 1000
+  })
   .check(function(argv) {
     if (argv._.length !== 2) throw new Error('URL and OUT_FILE must be given.');
   })
@@ -54,6 +64,9 @@ if (hide_selector) {
   css_text += "\n\n " + hide_selector + " { display: none; }\n";
 }
 
+var viewport_width = argv.w || argv['browser-width'];
+var delay_time     = argv.d || argv['delay'];
+
 function depict(url, out_file, selector, css_text) {
   // phantomjs heavily relies on callback functions
 
@@ -72,7 +85,9 @@ function depict(url, out_file, selector, css_text) {
   function openPage(_page) {
     page = _page;
     page.set('onError', function() { return; });
+    page.onConsoleMessage = function (msg) { console.log(msg); };
     page.open(url, prepForRender);
+    page.set('viewportSize', {width: viewport_width, height: 900}); // The height isn't taken into account here but phantomjs requires an object with both a width and a height.
   }
 
   function prepForRender(status) {
@@ -91,8 +106,10 @@ function depict(url, out_file, selector, css_text) {
   }
 
   function renderImage(rect) {
-    page.set('clipRect', rect);
-    page.render(out_file, cleanup);
+    setTimeout(function(){
+      page.set('clipRect', rect);
+      page.render(out_file, cleanup);
+    }, delay_time)
   }
 
   function cleanup() {
