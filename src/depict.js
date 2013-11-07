@@ -4,7 +4,6 @@ var child_process = require('child_process');
 var fs = require('fs');
 var optimist = require('optimist');
 var phantom = require('phantom');
-var sleep   = require('sleep');
 
 var argv = optimist
   .usage('Usage: depict URL OUT_FILE [OPTIONS]')
@@ -35,8 +34,8 @@ var argv = optimist
   })
   .options('d', {
     alias: 'delay',
-    describe: 'Specify a delay time, in seconds.',
-    default: 5
+    describe: 'Specify a delay time, in milliseconds.',
+    default: 1000
   })
   .check(function(argv) {
     if (argv._.length !== 2) throw new Error('URL and OUT_FILE must be given.');
@@ -87,7 +86,7 @@ function depict(url, out_file, selector, css_text) {
     page = _page;
     page.set('onError', function() { return; });
     page.open(url, prepForRender);
-    page.set('viewportSize', {width: viewport_width, height: 900});
+    page.set('viewportSize', {width: viewport_width, height: 900}); // The height isn't taken into account here but phantomjs requires an object with both a width and a height.
   }
 
   function prepForRender(status) {
@@ -106,9 +105,10 @@ function depict(url, out_file, selector, css_text) {
   }
 
   function renderImage(rect) {
-    sleep.sleep(delay_time);
-    page.set('clipRect', rect);
-    page.render(out_file, cleanup);
+    setTimeout(function(){
+      page.set('clipRect', rect);
+      page.render(out_file, cleanup);
+    }, delay_time)
   }
 
   function cleanup() {
