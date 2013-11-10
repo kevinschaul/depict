@@ -24,7 +24,7 @@ var argv = optimist
   })
   .options('H', {
     alias: 'hide-selector',
-    describe: 'Hide attributes of this selector berore rendering.',
+    describe: 'Hide attributes of this selector before rendering.',
     default: false
   })
   .options('w', {
@@ -65,7 +65,7 @@ if (hide_selector) {
 }
 
 var viewport_width = argv.w || argv['browser-width'];
-var delay_time     = argv.d || argv['delay'];
+var delay_time = argv.d || argv['delay'];
 
 function depict(url, out_file, selector, css_text) {
   // phantomjs heavily relies on callback functions
