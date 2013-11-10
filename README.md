@@ -26,10 +26,12 @@ Then, install depict from [npm](https://npmjs.org/package/depict). The global in
     Usage: depict URL OUT_FILE [OPTIONS]
 
     Options:
-      -h, --help      Display help  [default: false]
-      -s, --selector  CSS selector  [default: "body"]
-      -c, --css       CSS file to include in rendering  [default: false]
+      -h, --help           Display help  [default: false]
+      -s, --selector       CSS selector  [default: "body"]
+      -c, --css            CSS file to include in rendering  [default: false]
       -H, --hide-selector  Hide attributes of this selector berore rendering.  [default: false]
+      -w, --browser-width  Specify the desired browser width.                  [default: 1440]
+      -d, --delay          Specify a delay time, in milliseconds.              [default: 1000]
 
 ## Examples
 
