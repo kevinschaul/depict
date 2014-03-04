@@ -1,11 +1,12 @@
 {
   "name": "depict",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": {
     "name": "Kevin Schaul",
     "email": "kevin.schaul@gmail.com",
     "url": "http://kevin.schaul.io"
   },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/kevinschaul/depict.git"
