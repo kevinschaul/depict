@@ -86,12 +86,18 @@ function depict(url, out_file, selector, css_text) {
     page = _page;
     page.set('onError', function() { return; });
     page.onConsoleMessage = function (msg) { console.log(msg); };
+
+    page.set('onCallback', function(data) {
+        console.log(JSON.stringify(data));
+        page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+    });
+
     page.open(url, prepForRender);
     page.set('viewportSize', {width: viewport_width, height: 900}); // The height isn't taken into account here but phantomjs requires an object with both a width and a height.
   }
 
   function prepForRender(status) {
-    page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+    //page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
   }
 
   function runInPhantomBrowser(selector, css_text) {

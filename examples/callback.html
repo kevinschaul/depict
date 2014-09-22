@@ -1,0 +1,22 @@
+<div class='target'>
+    target
+</div>
+
+<script src='http://code.jquery.com/jquery-1.11.1.min.js'></script>
+<script>
+
+$(document).ready(function() {
+
+    var $el = $('.target');
+
+    window.setTimeout(function() {
+        $el.html('A CHANGE!');
+
+        if (typeof window.callPhantom === 'function') {
+            window.callPhantom('ready to take screenshot');
+        }
+    }, 2000);
+
+});
+
+</script>
