@@ -73,6 +73,8 @@ var viewport_width = argv.w || argv['browser-width'];
 var delay_time = argv.d || argv['delay'];
 var callPhantom = argv['call-phantom'];
 
+var callPhantomTimeout;
+
 function depict(url, out_file, selector, css_text) {
   // phantomjs heavily relies on callback functions
 
@@ -95,8 +97,13 @@ function depict(url, out_file, selector, css_text) {
 
     if (callPhantom) {
       page.set('onCallback', function(data) {
-        // Ensure message sent was for depict and status is ready
+        // Ensure message sent was for depict
         if (data.target === 'depict') {
+
+          // Clear the phantom timeout
+          clearTimeout(callPhantomTimeout);
+
+          // Ensure status is ready
           if (data.status === 'ready') {
             page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
           } else {
@@ -112,7 +119,13 @@ function depict(url, out_file, selector, css_text) {
   }
 
   function prepForRender(status) {
-    if (!callPhantom) {
+    if (callPhantom) {
+      callPhantomTimeout = setTimeout(function() {
+        console.log('Error: callPhantom() was not called; depict timed out.');
+        ph.exit();
+        process.exit(2);
+      }, 30000);
+    } else {
       page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
     }
   }
