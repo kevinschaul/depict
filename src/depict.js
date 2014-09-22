@@ -37,6 +37,11 @@ var argv = optimist
     describe: 'Specify a delay time, in milliseconds.',
     default: 1000
   })
+  // TODO Work on this interface
+  .options('call-phantom', {
+    describe: 'Whether to wait for the target page to call `callPhantom()`.',
+    default: false
+  })
   .check(function(argv) {
     if (argv._.length !== 2) throw new Error('URL and OUT_FILE must be given.');
   })
@@ -56,7 +61,7 @@ var out_file = argv._[1];
 var css_file = argv.c || argv.css;
 var css_text = '';
 if (css_file) {
-    css_text = fs.readFileSync(css_file, 'utf8');
+  css_text = fs.readFileSync(css_file, 'utf8');
 }
 
 var hide_selector = argv.H || argv["hide-selector"];
@@ -66,6 +71,7 @@ if (hide_selector) {
 
 var viewport_width = argv.w || argv['browser-width'];
 var delay_time = argv.d || argv['delay'];
+var callPhantom = argv['call-phantom'];
 
 function depict(url, out_file, selector, css_text) {
   // phantomjs heavily relies on callback functions
@@ -86,18 +92,18 @@ function depict(url, out_file, selector, css_text) {
     page = _page;
     page.set('onError', function() { return; });
     page.onConsoleMessage = function (msg) { console.log(msg); };
-
-    page.set('onCallback', function(data) {
-        console.log(JSON.stringify(data));
-        page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
-    });
-
     page.open(url, prepForRender);
     page.set('viewportSize', {width: viewport_width, height: 900}); // The height isn't taken into account here but phantomjs requires an object with both a width and a height.
   }
 
   function prepForRender(status) {
-    //page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+    if (callPhantom) {
+      page.set('onCallback', function() {
+        page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+      });
+    } else {
+      page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+    }
   }
 
   function runInPhantomBrowser(selector, css_text) {
