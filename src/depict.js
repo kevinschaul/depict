@@ -37,13 +37,19 @@ var argv = optimist
     describe: 'Specify a delay time, in milliseconds.',
     default: 1000
   })
-  // TODO Work on this interface
   .options('call-phantom', {
     describe: 'Whether to wait for the target page to call `callPhantom()`.',
     default: false
   })
+  .options('call-phantom-timeout', {
+    describe: 'How long to wait for the target page to call `callPhantom()`, in seconds.',
+    default: 30
+  })
   .check(function(argv) {
     if (argv._.length !== 2) throw new Error('URL and OUT_FILE must be given.');
+    if (argv['call-phantom-timeout'] && !argv['call-phantom']) {
+      throw new Error('--call-phantom-timeout requires --call-phantom');
+    }
   })
   .argv;
 
@@ -71,9 +77,11 @@ if (hide_selector) {
 
 var viewport_width = argv.w || argv['browser-width'];
 var delay_time = argv.d || argv['delay'];
-var callPhantom = argv['call-phantom'];
 
-var callPhantomTimeout;
+var callPhantom = argv['call-phantom'];
+var callPhantomTimeout = (argv['call-phantom-timeout'] || 30) * 1000;
+
+var callPhantomTimeoutID;
 
 function depict(url, out_file, selector, css_text) {
   // phantomjs heavily relies on callback functions
@@ -101,7 +109,7 @@ function depict(url, out_file, selector, css_text) {
         if (data.target === 'depict') {
 
           // Clear the phantom timeout
-          clearTimeout(callPhantomTimeout);
+          clearTimeout(callPhantomTimeoutID);
 
           // Ensure status is ready
           if (data.status === 'ready') {
@@ -120,11 +128,11 @@ function depict(url, out_file, selector, css_text) {
 
   function prepForRender(status) {
     if (callPhantom) {
-      callPhantomTimeout = setTimeout(function() {
+      callPhantomTimeoutID = setTimeout(function() {
         console.log('Error: callPhantom() was not called; depict timed out.');
         ph.exit();
         process.exit(2);
-      }, 30000);
+      }, callPhantomTimeout);
     } else {
       page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
     }
