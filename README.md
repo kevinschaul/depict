@@ -9,6 +9,8 @@ With depict, charts based on living data can be rendered into flat images at reg
 ## Features
 
 - Include an extra css file before rendering, useful for hiding UI components that don't make sense for static images
+- Optionally let depict know when it's OK to take a screenshot with the
+  `--call-phantom` option
 
 ## Installation
 
@@ -26,12 +28,13 @@ Then, install depict from [npm](https://npmjs.org/package/depict). The global in
     Usage: depict URL OUT_FILE [OPTIONS]
 
     Options:
-      -h, --help           Display help  [default: false]
-      -s, --selector       CSS selector  [default: "body"]
-      -c, --css            CSS file to include in rendering  [default: false]
-      -H, --hide-selector  Hide attributes of this selector berore rendering.  [default: false]
-      -w, --browser-width  Specify the desired browser width.                  [default: 1440]
-      -d, --delay          Specify a delay time, in milliseconds.              [default: 1000]
+      -h, --help           Display help                                                  [default: false]
+      -s, --selector       CSS selector                                                  [default: "body"]
+      -c, --css            CSS file to include in rendering                              [default: false]
+      -H, --hide-selector  Hide attributes of this selector before rendering.            [default: false]
+      -w, --browser-width  Specify the desired browser width.                            [default: 1440]
+      -d, --delay          Specify a delay time, in milliseconds.                        [default: 1000]
+      --call-phantom       Whether to wait for the target page to call `callPhantom()`.  [default: false]
 
 ## Examples
 
@@ -64,6 +67,20 @@ To include a css file:
     -s '.g-us-map-grid' \
     us-wine.png \
     -c exclude-ui.css
+
+To wait until the target page is ready (see
+[examples/callback.html](examples/callback.html) for a working example):
+
+    // Add this piece of code on the target page when depict should take
+    // the screenshot.
+    if (typeof window.callPhantom === 'function') {
+        window.callPhantom({ target: 'depict', status: 'ready' });
+    }
+
+    depict \
+    http://0.0.0.0:8001/callback.html \
+    out.png \
+    --call-phantom
 
 ## Pro tips
 

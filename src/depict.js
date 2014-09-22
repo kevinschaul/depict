@@ -92,14 +92,25 @@ function depict(url, out_file, selector, css_text) {
     page = _page;
     page.set('onError', function() { return; });
     page.onConsoleMessage = function (msg) { console.log(msg); };
+
+    // TODO Listen for 'onCallback' here, before the page is opened.
     page.open(url, prepForRender);
     page.set('viewportSize', {width: viewport_width, height: 900}); // The height isn't taken into account here but phantomjs requires an object with both a width and a height.
   }
 
   function prepForRender(status) {
     if (callPhantom) {
-      page.set('onCallback', function() {
-        page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+      page.set('onCallback', function(data) {
+        // Ensure message sent was for depict and status is ready
+        if (data.target === 'depict') {
+          if (data.status === 'ready') {
+            page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+          } else {
+            console.log('Error: callPhantom() did not have status of `ready`');
+            ph.exit();
+            process.exit(1);
+          }
+        }
       });
     } else {
       page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);

@@ -13,7 +13,7 @@ $(document).ready(function() {
         $el.html('A CHANGE!');
 
         if (typeof window.callPhantom === 'function') {
-            window.callPhantom('depict');
+            window.callPhantom({ target: 'depict', status: 'ready' });
         }
     }, 2000);
 
