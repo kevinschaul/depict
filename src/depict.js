@@ -47,7 +47,7 @@ var argv = optimist
   })
   .check(function(argv) {
     if (argv._.length !== 2) throw new Error('URL and OUT_FILE must be given.');
-    if (argv['call-phantom-timeout'] && !argv['call-phantom']) {
+    if (argv['call-phantom-timeout'] !== 30 && !argv['call-phantom']) {
       throw new Error('--call-phantom-timeout requires --call-phantom');
     }
   })
