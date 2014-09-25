@@ -46,9 +46,13 @@ var argv = optimist
     default: 30
   })
   .check(function(argv) {
-    if (argv._.length !== 2) throw new Error('URL and OUT_FILE must be given.');
+    if (argv._.length !== 2) {
+      throw new Error('URL and OUT_FILE must be given.');
+      process.exit(1);
+    }
     if (argv['call-phantom-timeout'] !== 30 && !argv['call-phantom']) {
       throw new Error('--call-phantom-timeout requires --call-phantom');
+      process.exit(1);
     }
   })
   .argv;
@@ -116,8 +120,6 @@ function depict(url, out_file, selector, css_text) {
         // Ensure message sent was for depict
         if (data.target === 'depict') {
 
-          // Clear the phantom timeout
-          clearTimeout(callPhantomTimeoutID);
 
           // Ensure status is ready
           if (data.status === 'ready') {
@@ -125,6 +127,7 @@ function depict(url, out_file, selector, css_text) {
           } else {
             ph.exit();
             throw new Error('callPhantom() did not have status of `ready`');
+            process.exit(1);
           }
         }
       });
@@ -139,6 +142,7 @@ function depict(url, out_file, selector, css_text) {
           callPhantomTimeoutID = setTimeout(function() {
             ph.exit();
             throw new Error('callPhantom() was not called; depict timed out.');
+            process.exit(1);
           }, callPhantomTimeout);
         } else {
           page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
@@ -146,6 +150,7 @@ function depict(url, out_file, selector, css_text) {
     } else {
         ph.exit()
         throw new Error('Page could not be loaded. Response code: ' + pageResponse);
+        process.exit(1);
     }
   }
 
@@ -161,6 +166,9 @@ function depict(url, out_file, selector, css_text) {
   }
 
   function renderImage(rect) {
+    // Clear the phantom timeout
+    clearTimeout(callPhantomTimeoutID);
+
     setTimeout(function(){
       page.set('clipRect', rect);
       page.render(out_file, cleanup);
