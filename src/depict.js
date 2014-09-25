@@ -99,6 +99,7 @@ function depict(url, out_file, selector, css_text) {
   }
 
   function openPage(_page) {
+    // TODO Check whether something at that url actually exists
     page = _page;
     page.set('onError', function() { return; });
     page.onConsoleMessage = function (msg) { console.log(msg); };
@@ -115,9 +116,8 @@ function depict(url, out_file, selector, css_text) {
           if (data.status === 'ready') {
             page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
           } else {
-            console.log('Error: callPhantom() did not have status of `ready`');
             ph.exit();
-            process.exit(1);
+            throw new Error('callPhantom() did not have status of `ready`');
           }
         }
       });
@@ -129,9 +129,8 @@ function depict(url, out_file, selector, css_text) {
   function prepForRender(status) {
     if (callPhantom) {
       callPhantomTimeoutID = setTimeout(function() {
-        console.log('Error: callPhantom() was not called; depict timed out.');
         ph.exit();
-        process.exit(2);
+        throw new Error('callPhantom() was not called; depict timed out.');
       }, callPhantomTimeout);
     } else {
       page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
@@ -163,4 +162,3 @@ function depict(url, out_file, selector, css_text) {
 }
 
 depict(url, out_file, selector, css_text);
-
