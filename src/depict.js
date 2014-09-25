@@ -87,6 +87,7 @@ var callPhantomTimeout = (argv['call-phantom-timeout'] || 30) * 1000;
 
 var pageResponse;
 var callPhantomTimeoutID;
+var hasTakenScreenshot = false;
 
 function depict(url, out_file, selector, css_text) {
   // phantomjs heavily relies on callback functions
@@ -110,23 +111,21 @@ function depict(url, out_file, selector, css_text) {
 
     // Ensure status code of requested url is 200
     page.set('onResourceReceived', function(response) {
-        if (response.url === url) {
-            pageResponse = response.status;
-        }
+      if (response.url === url) {
+        pageResponse = response.status;
+      }
     });
 
     if (callPhantom) {
       page.set('onCallback', function(data) {
         // Ensure message sent was for depict
         if (data.target === 'depict') {
-
-
           // Ensure status is ready
           if (data.status === 'ready') {
             page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
           } else {
+            process.stdout.write('callPhantom() did not have status of `ready`\n');
             ph.exit();
-            throw new Error('callPhantom() did not have status of `ready`');
             process.exit(1);
           }
         }
@@ -138,19 +137,21 @@ function depict(url, out_file, selector, css_text) {
 
   function prepForRender(status) {
     if (pageResponse && pageResponse === 200 && status === 'success') {
-        if (callPhantom) {
-          callPhantomTimeoutID = setTimeout(function() {
+      if (callPhantom) {
+        callPhantomTimeoutID = setTimeout(function() {
+          if (!hasTakenScreenshot) {
+            process.stdout.write('callPhantom() was not called; depict timed out.\n');
             ph.exit();
-            throw new Error('callPhantom() was not called; depict timed out.');
             process.exit(1);
-          }, callPhantomTimeout);
-        } else {
-          page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
-        }
+          }
+        }, callPhantomTimeout);
+      } else {
+        page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+      }
     } else {
-        ph.exit()
-        throw new Error('Page could not be loaded. Response code: ' + pageResponse);
-        process.exit(1);
+      ph.exit()
+      process.stdout.write('Page could not be loaded. Response code: ' + pageResponse + '\n');
+      process.exit(1);
     }
   }
 
@@ -169,6 +170,9 @@ function depict(url, out_file, selector, css_text) {
     // Clear the phantom timeout
     clearTimeout(callPhantomTimeoutID);
 
+    // Not technically true yet, but at this point the screenshot will clearly
+    // be taken.
+    hasTakenScreenshot = true;
     setTimeout(function(){
       page.set('clipRect', rect);
       page.render(out_file, cleanup);
