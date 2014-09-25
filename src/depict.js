@@ -81,6 +81,7 @@ var delay_time = argv.d || argv['delay'];
 var callPhantom = argv['call-phantom'];
 var callPhantomTimeout = (argv['call-phantom-timeout'] || 30) * 1000;
 
+var pageResponse;
 var callPhantomTimeoutID;
 
 function depict(url, out_file, selector, css_text) {
@@ -99,10 +100,16 @@ function depict(url, out_file, selector, css_text) {
   }
 
   function openPage(_page) {
-    // TODO Check whether something at that url actually exists
     page = _page;
     page.set('onError', function() { return; });
     page.onConsoleMessage = function (msg) { console.log(msg); };
+
+    // Ensure status code of requested url is 200
+    page.set('onResourceReceived', function(response) {
+        if (response.url === url) {
+            pageResponse = response.status;
+        }
+    });
 
     if (callPhantom) {
       page.set('onCallback', function(data) {
@@ -127,13 +134,18 @@ function depict(url, out_file, selector, css_text) {
   }
 
   function prepForRender(status) {
-    if (callPhantom) {
-      callPhantomTimeoutID = setTimeout(function() {
-        ph.exit();
-        throw new Error('callPhantom() was not called; depict timed out.');
-      }, callPhantomTimeout);
+    if (pageResponse && pageResponse === 200 && status === 'success') {
+        if (callPhantom) {
+          callPhantomTimeoutID = setTimeout(function() {
+            ph.exit();
+            throw new Error('callPhantom() was not called; depict timed out.');
+          }, callPhantomTimeout);
+        } else {
+          page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+        }
     } else {
-      page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+        ph.exit()
+        throw new Error('Page could not be loaded. Response code: ' + pageResponse);
     }
   }
 
