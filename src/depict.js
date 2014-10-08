@@ -85,7 +85,6 @@ var delay_time = argv.d || argv['delay'];
 var callPhantom = argv['call-phantom'];
 var callPhantomTimeout = (argv['call-phantom-timeout'] || 30) * 1000;
 
-var pageResponse;
 var callPhantomTimeoutID;
 var hasTakenScreenshot = false;
 
@@ -109,13 +108,6 @@ function depict(url, out_file, selector, css_text) {
     page.set('onError', function() { return; });
     page.onConsoleMessage = function (msg) { console.log(msg); };
 
-    // Ensure status code of requested url is 200
-    page.set('onResourceReceived', function(response) {
-      if (response.url === url) {
-        pageResponse = response.status;
-      }
-    });
-
     if (callPhantom) {
       page.set('onCallback', function(data) {
         // Ensure message sent was for depict
@@ -136,7 +128,8 @@ function depict(url, out_file, selector, css_text) {
   }
 
   function prepForRender(status) {
-    if (pageResponse && pageResponse === 200 && status === 'success') {
+    // TODO status is 'success' even on a 404.
+    if (status === 'success') {
       if (callPhantom) {
         callPhantomTimeoutID = setTimeout(function() {
           if (!hasTakenScreenshot) {
@@ -156,6 +149,7 @@ function depict(url, out_file, selector, css_text) {
   }
 
   function runInPhantomBrowser(selector, css_text) {
+    debugger;
     if (css_text) {
       var style = document.createElement('style');
       style.appendChild(document.createTextNode(css_text));
