@@ -149,7 +149,6 @@ function depict(url, out_file, selector, css_text) {
   }
 
   function runInPhantomBrowser(selector, css_text) {
-    debugger;
     if (css_text) {
       var style = document.createElement('style');
       style.appendChild(document.createTextNode(css_text));
