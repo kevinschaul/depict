@@ -93,6 +93,7 @@ function depict(url, out_file, selector, css_text) {
 
     var page;
     var ph;
+    var response_code;
 
     console.log('\nRequesting', url);
 
@@ -107,6 +108,13 @@ function depict(url, out_file, selector, css_text) {
         page = _page;
         page.set('onError', function() { return; });
         page.onConsoleMessage = function (msg) { console.log(msg); };
+
+        page.set('onResourceReceived', function(response) {
+            // If this resource is the requested URL, save its response code
+            if (response.url === url && response.stage === 'end') {
+                response_code = response.status;
+            }
+        });
 
         if (callPhantom) {
             page.set('onCallback', function(data) {
@@ -128,8 +136,7 @@ function depict(url, out_file, selector, css_text) {
     }
 
     function prepForRender(status) {
-        // TODO status is 'success' even on a 404.
-        if (status === 'success') {
+        if (response_code >= 200 && response_code < 300 && status === 'success') {
             if (callPhantom) {
                 callPhantomTimeoutID = setTimeout(function() {
                     if (!hasTakenScreenshot) {
@@ -143,7 +150,7 @@ function depict(url, out_file, selector, css_text) {
             }
         } else {
             ph.exit()
-            process.stdout.write('Page could not be loaded. Response code: ' + pageResponse + '\n');
+            process.stdout.write('Page could not be loaded. Response code: ' + response_code + '\n');
             process.exit(1);
         }
     }
