@@ -1,6 +1,6 @@
 {
   "name": "depict",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "author": {
     "name": "Kevin Schaul",
     "email": "kevin.schaul@gmail.com",
@@ -17,6 +17,7 @@
   "preferGlobal": true,
   "dependencies": {
     "optimist": "~0.6.0",
-    "phantom": "~0.5.2"
+    "phantom": "~0.5.2",
+    "phantomjs": "~1.9.12"
   }
 }
