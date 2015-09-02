@@ -2,13 +2,13 @@
 
 Depict aims to easily render fallback images for complex visualizations. (IE 8, I'm looking at you.)
 
-Given a url and [css selector](http://www.w3.org/TR/selectors/#selectors), depict outputs a .png of the rendered element.
+Given a URL and [CSS selector](http://www.w3.org/TR/selectors/#selectors), depict outputs a PNG file of the rendered element.
 
 With depict, charts based on living data can be rendered into flat images at regular intervals, no human interaction required. Think jobs numbers, congressional votes, etc.
 
 ## Features
 
-- Include an extra css file before rendering, useful for hiding UI components that don't make sense for static images
+- Include an extra CSS file before rendering, useful for hiding UI components that don't make sense for static images
 - Optionally let depict know when it's OK to take a screenshot with the
   `--call-phantom` option
 
@@ -61,7 +61,7 @@ To hide certain components, such as UI elements:
     us-wine.png \
     -H '.g-us-map-slider'
 
-To include a css file:
+To include a CSS file:
 
     depict \
     http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html \
@@ -95,7 +95,7 @@ Add a line in your `Makefile` to run depict automatically. (You are [using make]
     fallback/chart.png: index.html
         depict http://0.0.0.0:1337 $@ -s '#chart'
 
-Hide multiple css selectors by using commas:
+Hide multiple CSS selectors by using commas:
 
     depict \
     http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html \
