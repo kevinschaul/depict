@@ -14,10 +14,13 @@ With depict, charts based on living data can be rendered into flat images at reg
 
 ## Installation
 
-Depict requires [PhantomJS](http://phantomjs.org/download.html), which can be installed on OS X via [Homebrew](http://brew.sh/).
+Depict requires PhantomJS 1.X, which can be installed on OS X via
+[Homebrew](http://brew.sh/). **Depict does not yet work with PhantomJS
+2.X**.
 
     brew update
-    brew install phantomjs
+    brew install homebrew/versions/phantomjs192
+    brew link homebrew/versions/phantomjs192
 
 Then, install depict from [npm](https://npmjs.org/package/depict). The global install is recommended for easy command-line access.
 
