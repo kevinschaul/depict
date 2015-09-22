@@ -17,7 +17,7 @@
   "preferGlobal": true,
   "dependencies": {
     "optimist": "~0.6.0",
-    "phantom": "~0.5.2",
+    "phantom": "~0.7.2",
     "phantomjs": "~1.9.12"
   }
 }
