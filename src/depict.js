@@ -4,6 +4,7 @@ var child_process = require('child_process');
 var fs = require('fs');
 var optimist = require('optimist');
 var phantom = require('phantom');
+var phantomOptions = { 'web-security': 'no' };
 
 var argv = optimist
 .usage('Usage: depict URL OUT_FILE [OPTIONS]')
@@ -97,7 +98,7 @@ function depict(url, out_file, selector, css_text) {
 
     console.log('\nRequesting', url);
 
-    phantom.create(createPage)
+    phantom.create({parameters: phantomOptions}, createPage)
 
     function createPage(_ph) {
         ph = _ph;
