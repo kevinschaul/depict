@@ -127,7 +127,7 @@ function depict(url, out_file, selector, css_text) {
                 if (data.target === 'depict') {
                     // Ensure status is ready
                     if (data.status === 'ready') {
-                        page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+                        scheduleRender();
                     } else {
                         process.stdout.write('callPhantom() did not have status of `ready`\n');
                         ph.exit();
@@ -151,13 +151,19 @@ function depict(url, out_file, selector, css_text) {
                     }
                 }, callPhantomTimeout);
             } else {
-                page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+                scheduleRender();
             }
         } else {
             ph.exit()
             process.stdout.write('Page could not be loaded. Response code: ' + response_code + '\n');
             process.exit(1);
         }
+    }
+
+    function scheduleRender() {
+        setTimeout(function(){
+            page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+        }, delay_time);
     }
 
     function runInPhantomBrowser(selector, css_text) {
@@ -175,13 +181,10 @@ function depict(url, out_file, selector, css_text) {
         // Clear the phantom timeout
         clearTimeout(callPhantomTimeoutID);
 
-        // Not technically true yet, but at this point the screenshot will clearly
-        // be taken.
+        page.set('clipRect', rect);
+        page.render(out_file, cleanup);
+
         hasTakenScreenshot = true;
-        setTimeout(function(){
-            page.set('clipRect', rect);
-            page.render(out_file, cleanup);
-        }, delay_time)
     }
 
     function cleanup() {
