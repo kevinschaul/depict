@@ -76,7 +76,9 @@ var out_file = argv._[1];
 var css_file = argv.c || argv.css;
 var css_text = '';
 if (css_file) {
-    css_text = fs.readFileSync(css_file, 'utf8');
+    css_file.split(',').forEach(function (css_path) {
+        css_text += fs.readFileSync(css_path.trim(), 'utf8')
+    })
 }
 
 var hide_selector = argv.H || argv["hide-selector"];

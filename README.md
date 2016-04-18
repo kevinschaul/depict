@@ -31,7 +31,7 @@ Then, install depict from [npm](https://npmjs.org/package/depict). The global in
     Options:
       -h, --help              Display help                                                               [default: false]
       -s, --selector          CSS selector                                                               [default: "body"]
-      -c, --css               CSS file to include in rendering                                           [default: false]
+      -c, --css               CSS file(s) to include in rendering                                        [default: false]
       -H, --hide-selector     Hide attributes of this selector before rendering.                         [default: false]
       -w, --browser-width     Specify the desired browser width.                                         [default: 1440]
       -d, --delay             Specify a delay time, in milliseconds.                                     [default: 1000]
@@ -103,4 +103,12 @@ Hide multiple CSS selectors by using commas:
     -s '.g-us-map-grid' \
     us-wine.png \
     -H '.g-us-map-slider, .g-map-legend-click'
+
+Include multiple CSS files by using commas:
+
+    depict \
+    http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html \
+    -s '.g-us-map-grid' \
+    us-wine.png \
+    -c 'hide-ui.css,touch-device.css'
 
