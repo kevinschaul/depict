@@ -104,3 +104,11 @@ Hide multiple CSS selectors by using commas:
     us-wine.png \
     -H '.g-us-map-slider, .g-map-legend-click'
 
+Include multiple CSS files by using commas:
+
+    depict \
+    http://www.nytimes.com/interactive/2013/07/07/business/a-nation-of-wineries.html \
+    -s '.g-us-map-grid' \
+    us-wine.png \
+    -c 'hide-ui.css,touch-device.css'
+
