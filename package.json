@@ -16,8 +16,8 @@
   },
   "preferGlobal": true,
   "dependencies": {
-    "optimist": "~0.6.0",
-    "phantom": "~1.0",
-    "phantomjs": "~2.1"
+    "node-horseman": "^3.0.1",
+    "optimist": "^0.6.1",
+    "phantomjs": "^2.1.7"
   }
 }

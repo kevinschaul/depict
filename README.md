@@ -14,8 +14,7 @@ With depict, charts based on living data can be rendered into flat images at reg
 
 ## Installation
 
-Depict requires PhantomJS, which can be installed on OS X via
-[Homebrew](http://brew.sh/).
+Depict requires PhantomJS, which can be installed on OS X via [Homebrew](http://brew.sh/).
 
     brew update
     brew install phantomjs
@@ -111,4 +110,3 @@ Include multiple CSS files by using commas:
     -s '.g-us-map-grid' \
     us-wine.png \
     -c 'hide-ui.css,touch-device.css'
-

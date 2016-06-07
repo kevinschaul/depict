@@ -1,0 +1,15 @@
+{
+    "preset": "google",
+    "fileExtensions": [ ".js" ],
+	"validateIndentation": "\t",
+	"jsDoc": {
+		"disallowNewlineAfterDescription": true
+	},
+	"disallowMultipleLineBreaks": null,
+	disallowSpacesInsideObjectBrackets: null,
+	"requireDotNotation": null,
+    "maximumLineLength": 80,
+    "requireCapitalizedConstructors": true,
+    "disallowEmptyBlocks": true,
+    "excludeFiles": [ "node_modules/**", "coverage/**", "dist/**" ]
+}
