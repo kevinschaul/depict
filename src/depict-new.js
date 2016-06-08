@@ -145,7 +145,6 @@ let horseyOptions = {
 };
 
 let horseman = new Horseman(horseyOptions);
-let scrollToURL = 'https://cdnjs.cloudflare.com/ajax/libs/jquery-scrollTo/2.1.0/jquery.scrollTo.min.js';
 
 function depict(url, out_file, selector, css_text) {
 
@@ -153,57 +152,25 @@ function depict(url, out_file, selector, css_text) {
         .on('error', console.error)
         .viewport(viewport_width, 900)
         .scrollTo(0, 0)
-        .includeJs(scrollToURL)
         .open(url)
-        .then(() => {
-            var i = 0,
-                top,
-                getHeight = function () {
-                    return document.body.scrollHeight;
-                },
-                getDocScrollSteps = function () {
-                    return document.body.scrollHeight / 10;
-                },
-                getScrollTop = function () {
-                    return document.body.scrollTop;
-                };
+        .status()
+        .then(statusCode => {
+            console.log('HTTP status code: ', statusCode);
 
-            let height = horseman.evaluate(getHeight);
-            let scrollStepDist = horseman.evaluate(getDocScrollSteps);
+            if (statusCode >= 400) {
+                throw 'Page failed with status: ' + statusCode;
+            }
 
-            let chicken = setInterval(function () {
-                top = horseman.evaluate(getScrollTop);
-
-                horseman.scrollTo(top + scrollStepDist, 0)
-
-                if (top >= height) {
-                    horseman
-                        .screenshot(out_file)
-                        .close();
-                    clearInterval(chicken);
-                }
-            }, 1000);
         })
-        // .status()
-        // .then(statusCode => {
-        //     console.log('HTTP status code: ', statusCode);
-        //
-        //     if (statusCode >= 400) {
-        //         throw 'Page failed with status: ' + statusCode;
-        //     }
-        //
-        // })
-        // .evaluate(() => {
-        //     $.scrollTo(6000);
-        // })
-        // .wait(delay_time)
-        // .screenshot(out_file)
-        // .catch(function (err) {
-        //     console.log('Error taking screenshot: ', err);
-        // })
-        // .finally(() => {
-        //     horseman.close();
-        // })
+        .injectJs('steps.js')
+        .wait(delay_time)
+        .screenshot(out_file)
+        .catch(function (err) {
+            console.log('Error taking screenshot: ', err);
+        })
+        .finally(() => {
+            horseman.close();
+        })
 }
 
 depict(url, out_file, selector, css_text);
