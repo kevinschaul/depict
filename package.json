@@ -1,23 +1,27 @@
 {
-  "name": "depict",
-  "version": "0.1.15",
-  "author": {
-    "name": "Kevin Schaul",
-    "email": "kevin.schaul@gmail.com",
-    "url": "http://kevin.schaul.io"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/kevinschaul/depict.git"
-  },
-  "bin": {
-    "depict": "./src/depict.js"
-  },
-  "preferGlobal": true,
-  "dependencies": {
-    "node-horseman": "^3.0.1",
-    "optimist": "^0.6.1",
-    "phantomjs": "^2.1.7"
-  }
+    "name": "depict",
+    "version": "2.0",
+    "contributors": [{
+        "name": "Kevin Schaul",
+        "email": "kevin.schaul@gmail.com",
+        "url": "http://kevin.schaul.io"
+    }, {
+        "name": "Erik Reyna",
+        "email": "erik.reyna@washpost.com",
+        "url": "https://github.com/erikreyna"
+    }],
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/kevinschaul/depict.git"
+    },
+    "bin": {
+        "depict": "./src/depict.js"
+    },
+    "preferGlobal": true,
+    "dependencies": {
+        "node-horseman": "^3.0.1",
+        "optimist": "^0.6.1",
+        "phantomjs": "^2.1.7"
+    }
 }

@@ -1,198 +1,223 @@
 #!/usr/bin/env node
 
-var child_process = require('child_process');
-var fs = require('fs');
-var optimist = require('optimist');
-var phantom = require('phantom');
-// http://phantomjs.org/api/command-line.html
-var phantomOptions = {
-    'web-security': 'false',
-    'ignore-ssl-errors': 'true'
-};
+// use of block-scoped declarations (let, const, function, class)
+// not supported yet unless using strict mode
+'use strict';
 
-var argv = optimist
-.usage('Usage: depict URL OUT_FILE [OPTIONS]')
-.options('h', {
-    alias: 'help',
-    describe: 'Display help',
-    default: false
-})
-.options('s', {
-    alias: 'selector',
-    describe: 'CSS selector',
-    default: 'body'
-})
-.options('c', {
-    alias: 'css',
-    describe: 'CSS file to include in rendering',
-    default: false
-})
-.options('H', {
-    alias: 'hide-selector',
-    describe: 'Hide attributes of this selector before rendering.',
-    default: false
-})
-.options('w', {
-    alias: 'browser-width',
-    describe: 'Specify the desired browser width.',
-    default: 1440
-})
-.options('d', {
-    alias: 'delay',
-    describe: 'Specify a delay time, in milliseconds.',
-    default: 1000
-})
-.options('call-phantom', {
-    describe: 'Whether to wait for the target page to call `callPhantom()`.',
-    default: false
-})
-.options('call-phantom-timeout', {
-    describe: 'How long to wait for the target page to call `callPhantom()`, in seconds.',
-    default: 30
-})
-.check(function(argv) {
-    if (argv._.length !== 2) {
-        throw new Error('URL and OUT_FILE must be given.');
-        process.exit(1);
-    }
-    if (argv['call-phantom-timeout'] !== 30 && !argv['call-phantom']) {
-        throw new Error('--call-phantom-timeout requires --call-phantom');
-        process.exit(1);
-    }
-})
-.argv;
+const child_process = require('child_process');
+const fs = require('fs');
+const optimist = require('optimist');
+const Horseman = require('node-horseman');
 
-if (argv.h || argv.help) return optimist.showHelp();
+let argv = optimist.usage('Usage: depict URL OUT_FILE [OPTIONS]')
+    .options('h', {
+        alias: 'help',
+        describe: 'Display help',
+        default: false
+    })
+    .options('s', {
+        alias: 'selector',
+        describe: 'CSS selector',
+        default: 'body'
+    })
+    .options('c', {
+        alias: 'css',
+        describe: 'CSS file to include in rendering',
+        default: false
+    })
+    .options('H', {
+        alias: 'hide-selector',
+        describe: 'Hide attributes of this selector before rendering.',
+        default: false
+    })
+    .options('w', {
+        alias: 'browser-width',
+        describe: 'Specify the desired browser width.',
+        default: 1440
+    })
+    .options('d', {
+        alias: 'delay',
+        describe: 'Specify a delay time, in milliseconds.',
+        default: 1000
+    })
+    .options('call-phantom', {
+        describe: 'Whether to wait for the target page to call Horseman.',
+        default: false
+    })
+    .options('call-phantom-timeout', {
+        describe: 'How long to wait for the target page to call Horseman, in seconds.',
+        default: 30
+    })
+    .check(function (argv) {
+        if (argv._.length !== 2) {
+            throw new Error('URL and OUT_FILE must be given.');
+            process.exit(1);
+        }
+        if (argv['call-phantom-timeout'] !== 30 && !argv['call-phantom']) {
+            throw new Error('--call-phantom-timeout requires --call-phantom');
+            process.exit(1);
+        }
+    })
+    .argv;
+
+if (argv.h || argv.help) {
+    return optimist.showHelp();
+}
 
 // Append 'http://' if protocol not specified
-var url = argv._[0];
+let url = argv._[0];
+
 if (!url.match(/^\w+:\/\//)) {
     url = 'http://' + url;
 }
 
-var selector = argv.s || argv.selector;
-var out_file = argv._[1];
+let selector = argv.s || argv.selector;
 
-var css_file = argv.c || argv.css;
-var css_text = '';
+let out_file = argv._[1];
+
+let css_file = argv.c || argv.css;
+
+let css_text = '';
+
 if (css_file) {
     css_file.split(',').forEach(function (css_path) {
         css_text += fs.readFileSync(css_path.trim(), 'utf8')
     })
 }
 
-var hide_selector = argv.H || argv["hide-selector"];
+let hide_selector = argv.H || argv["hide-selector"];
+
 if (hide_selector) {
     css_text += "\n\n " + hide_selector + " { display: none; }\n";
 }
 
-var viewport_width = argv.w || argv['browser-width'];
-var delay_time = argv.d || argv['delay'];
+let viewport_width = argv.w || argv['browser-width'];
 
-var callPhantom = argv['call-phantom'];
-var callPhantomTimeout = (argv['call-phantom-timeout'] || 30) * 1000;
+let delay_time = argv.d || argv['delay'];
 
-var callPhantomTimeoutID;
-var hasTakenScreenshot = false;
+let callPhantom = argv['call-phantom'];
+
+let callPhantomTimeout = (argv['call-phantom-timeout'] || 30) * 1000;
+
+let callPhantomTimeoutID;
+
+let hasTakenScreenshot = false;
+
+let horseyOptions = {
+    // an array of local JavaScript files to load onto each page.
+    clientScripts: [],
+    // how long to wait for page loads or wait periods, default 5000 ms.
+    timeout: delay_time,
+    // how frequently to poll for page load state, default 50 ms.
+    interval: 50,
+    // port to mount the PhantomJS instance to, default 12401.
+    port: 12401,
+    // load all inlined images, default true.
+    loadImages: true,
+    // switch to new tab when created, default false.
+    switchToNewTab: false,
+    // A file where to store/use cookies.
+    cookiesFile: '',
+    // ignores SSL errors, such as expired or self-signed certificate errors.
+    ignoreSSLErrors: true,
+    // sets the SSL protocol for secure connections [sslv3|sslv2|tlsv1|any], default any.
+    sslProtocol: 'any',
+    // enables web security and forbids cross-domain XHR.
+    webSecurity: false,
+    // whether jQuery is automatically loaded into each page. Default is true. If jQuery is already present on the page, it is not injected.
+    injectJquery: true,
+    // whether bluebird is automatically loaded into each page. Default is false. If true and Promise is already present on the page, it is not injected. If 'bluebird' it is always injected as Bluebird, whether Promise is present or not.
+    injectBluebird: true,
+    // whether or not to enable bluebird debug features. Default is false. If true non-minified bluebird is injected and long stack traces are enabled
+    bluebirdDebug: true,
+    // specify the proxy server to use address:port, default not set.
+    // proxy: ,
+    // specify the proxy server type [http|socks5|none], default not set.
+    // proxyType: ,
+    // specify the auth information for the proxy user:pass, default not set.
+    // proxyAuth: ,
+    // If PhantomJS is not installed in your path, you can use this option to specify the executable's location.
+    // phantomPath: ,
+    // Enable web inspector on specified port, default not set.
+    debugPort: 4567,
+    // Autorun on launch when in debug mode, default is true.
+    debugAutorun: true
+};
+
+let horseman = new Horseman(horseyOptions);
 
 function depict(url, out_file, selector, css_text) {
-    // phantomjs heavily relies on callback functions
 
-    var page;
-    var ph;
-    var response_code;
-
-    console.log('\nRequesting', url);
-
-    phantom.create({parameters: phantomOptions}, createPage)
-
-    function createPage(_ph) {
-        ph = _ph;
-        ph.createPage(openPage);
-    }
-
-    function openPage(_page) {
-        page = _page;
-        page.set('onError', function() { return; });
-        page.onConsoleMessage = function (msg) { console.log(msg); };
-
-        page.set('onResourceReceived', function(response) {
-            // If this resource is the requested URL, save its response code
-            if (response.url === url && response.stage === 'end') {
-                response_code = response.status;
-            }
-        });
-
-        if (callPhantom) {
-            page.set('onCallback', function(data) {
-                // Ensure message sent was for depict
-                if (data.target === 'depict') {
-                    // Ensure status is ready
-                    if (data.status === 'ready') {
-                        scheduleRender();
-                    } else {
-                        process.stdout.write('callPhantom() did not have status of `ready`\n');
-                        ph.exit();
-                        process.exit(1);
-                    }
-                }
-            });
-        }
-        page.open(url, prepForRender);
-        page.set('viewportSize', {width: viewport_width, height: 900}); // The height isn't taken into account here but phantomjs requires an object with both a width and a height.
-    }
-
-    function prepForRender(status) {
-        if (response_code >= 200 && response_code < 300 && status === 'success') {
+    horseman
+        .on('error', (msg, trace) => {
+            console.error('Message %s from %s', msg, trace);
+        })
+        .on('onConsoleMessage', (msg, lineNumber, sourceId) => {
+            console.info('Message %s at %s from %s.\n', msg, lineNumber, sourceId);
+        })
+        .on('onCallback', data => {
             if (callPhantom) {
-                callPhantomTimeoutID = setTimeout(function() {
-                    if (!hasTakenScreenshot) {
-                        process.stdout.write('callPhantom() was not called; depict timed out.\n');
-                        ph.exit();
-                        process.exit(1);
-                    }
-                }, callPhantomTimeout);
-            } else {
-                scheduleRender();
+                if (data.target === 'depict' && data.status === 'ready') {
+                    setTimeout(() => {
+                        horseman.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+                    }, delay_time)
+                } else {
+                    console.error('callPhantom did not have status of `ready`\n');
+                    horseman.close();
+                }
             }
-        } else {
-            ph.exit()
-            process.stdout.write('Page could not be loaded. Response code: ' + response_code + '\n');
-            process.exit(1);
-        }
+        })
+        .viewport(viewport_width, 900)
+        .scrollTo(0, 0)
+        .open(url)
+        .status()
+        .then(statusCode => {
+            console.info('HTTP status code: ', statusCode);
+
+            if (statusCode >= 400) {
+                console.error('Page failed with status: %s', statusCode);
+                horseman.close();
+            }
+
+        })
+        .injectJs('steps.js')
+        .wait(delay_time)
+        .screenshot(out_file)
+        .catch(err => {
+            console.error('Error taking screenshot: ', err);
+        })
+        .finally(() => {
+            horseman.close();
+        })
+}
+
+function runInPhantomBrowser(selector, css_text) {
+    if (css_text) {
+        var style = document.createElement('style');
+        style.appendChild(document.createTextNode(css_text));
+        document.head.appendChild(style);
     }
 
-    function scheduleRender() {
-        setTimeout(function(){
-            page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
-        }, delay_time);
-    }
+    var element = document.querySelector(selector);
+    return element.getBoundingClientRect();
+}
 
-    function runInPhantomBrowser(selector, css_text) {
-        if (css_text) {
-            var style = document.createElement('style');
-            style.appendChild(document.createTextNode(css_text));
-            document.head.appendChild(style);
-        }
+function renderImage(rect) {
+    // Clear the horseman timeout
+    clearTimeout(callPhantomTimeoutID);
 
-        var element = document.querySelector(selector);
-        return element.getBoundingClientRect();
-    }
-
-    function renderImage(rect) {
-        // Clear the phantom timeout
-        clearTimeout(callPhantomTimeoutID);
-
-        page.set('clipRect', rect);
-        page.render(out_file, cleanup);
-
-        hasTakenScreenshot = true;
-    }
-
-    function cleanup() {
-        console.log('Saved imaged to', out_file);
-        ph.exit();
-    }
+    horseman
+        .crop(rect, out_file)
+        .then(msg => {
+            console.info('Saved image to %s', out_file);
+            hasTakenScreenshot = true;
+        })
+        .catch( (err, trace) => {
+            console.error('Error taking screenshot: %s\n%s', err, trace);
+        })
+        .finally(()=> {
+            horseman.close()
+        });
 }
 
 depict(url, out_file, selector, css_text);
