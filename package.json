@@ -1,6 +1,6 @@
 {
     "name": "depict",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "contributors": [{
         "name": "Kevin Schaul",
         "email": "kevin.schaul@gmail.com",
@@ -10,13 +10,17 @@
         "email": "erik.reyna@washpost.com",
         "url": "https://github.com/erikreyna"
     }],
+    "main": "lib/index",
+    "directories": [
+        "scripts/"
+    ],
     "license": "MIT",
     "repository": {
         "type": "git",
         "url": "https://github.com/kevinschaul/depict.git"
     },
     "bin": {
-        "depict": "./src/depict.js"
+        "depict": "./lib/index.js"
     },
     "preferGlobal": true,
     "dependencies": {
