@@ -112,7 +112,8 @@ info "Version bumped to v$NEW_VERSION"
 
 # Step 5: Push
 info "Pushing to remote..."
-git push --follow-tags
+git push
+git push origin "v$NEW_VERSION"
 
 # Step 6: Create GitHub release
 info "Creating GitHub release..."
@@ -123,5 +124,23 @@ else
     warn "GitHub CLI not found. Create release manually:"
     echo "  gh release create v$NEW_VERSION --generate-notes"
 fi
+
+# Step 7: Publish to registry
+info "Publishing to registry..."
+case $PROJECT_TYPE in
+    npm)
+        npm publish
+        info "Published to npm!"
+        ;;
+    python)
+        uv build
+        uvx twine upload dist/*
+        info "Published to PyPI!"
+        ;;
+    rust)
+        cargo publish
+        info "Published to crates.io!"
+        ;;
+esac
 
 info "Release v$NEW_VERSION complete!"

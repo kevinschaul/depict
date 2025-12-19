@@ -126,3 +126,7 @@ Include multiple CSS files by using commas:
         --css 'exclude-ui.css, touch-device.css' \
         -o us-wine.png
 
+## Releasing
+
+To release a new version: `./scripts/release.sh patch` (or `minor`/`major`)
+
