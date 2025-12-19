@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import puppeteer from 'puppeteer';
+import { depict } from './index.js';
 
 const argv = yargs(hideBin(process.argv))
     .usage('Usage: depict <URL> [options]')
@@ -63,151 +62,21 @@ const argv = yargs(hideBin(process.argv))
     })
     .argv;
 
-// Prepend 'https://' if protocol not specified
-let url = argv._[0];
-if (!url.match(/^\w+:\/\//)) {
-    url = `https://${url}`;
-}
+const url = argv._[0];
 
-const selector = argv.s || argv.selector;
-const outFile = argv.o || argv.output;
-const quality = argv.quality;
-
-const cssFile = argv.css;
-let cssText = '';
-if (cssFile) {
-    cssFile.split(',').forEach((cssPath) => {
-        cssText += fs.readFileSync(cssPath.trim(), 'utf8');
-    });
-}
-
-const hideSelector = argv.hide;
-if (hideSelector) {
-    cssText += `\n\n ${hideSelector} { display: none !important; }\n`;
-}
-
-const viewportWidth = argv.width;
-const viewportHeight = argv.height;
-const delayTime = argv.delay;
-const timeout = argv.timeout * 1000;
-
-const waitForSelector = argv['wait-for-selector'];
-const verbose = argv.verbose;
-
-async function depict(url, outFile, selector, cssText) {
-    if (verbose) console.log(`\nRequesting ${url}`);
-
-    const browser = await puppeteer.launch({
-        args: ['--disable-web-security', '--ignore-certificate-errors']
-    });
-
-    try {
-        const page = await browser.newPage();
-
-        // Set viewport size
-        await page.setViewport({
-            width: viewportWidth,
-            height: viewportHeight
-        });
-
-        // Forward console messages from the page if verbose
-        if (verbose) {
-            page.on('console', (msg) => console.log(msg.text()));
-        } else {
-            page.on('console', () => {});
-        }
-
-        // Suppress errors
-        page.on('pageerror', () => {});
-
-        let responseCode;
-
-        // Track response code
-        page.on('response', (response) => {
-            if (response.url() === url) {
-                responseCode = response.status();
-            }
-        });
-
-        // Navigate to the page
-        const response = await page.goto(url, {
-            waitUntil: 'networkidle0',
-            timeout: timeout
-        });
-
-        responseCode = response.status();
-
-        if (responseCode >= 200 && responseCode < 300) {
-            if (waitForSelector) {
-                // Wait for CSS selector to exist
-                try {
-                    await page.waitForSelector(waitForSelector, { timeout: timeout });
-                    await scheduleRender();
-                } catch (error) {
-                    process.stdout.write(`Selector not found within timeout: ${waitForSelector}\n`);
-                    await browser.close();
-                    process.exit(1);
-                }
-            } else {
-                await scheduleRender();
-            }
-        } else {
-            await browser.close();
-            process.stdout.write(`Page could not be loaded. Response code: ${responseCode}\n`);
-            process.exit(1);
-        }
-
-        async function scheduleRender() {
-            setTimeout(async () => {
-                await renderImage();
-            }, delayTime);
-        }
-
-        async function renderImage() {
-            // Inject CSS and get element bounding box
-            const rect = await page.evaluate((selector, cssText) => {
-                if (cssText) {
-                    const style = document.createElement('style');
-                    style.appendChild(document.createTextNode(cssText));
-                    document.head.appendChild(style);
-                }
-
-                const element = document.querySelector(selector);
-                if (!element) {
-                    return null;
-                }
-                return element.getBoundingClientRect();
-            }, selector, cssText);
-
-            if (!rect) {
-                await browser.close();
-                process.stdout.write(`Selector not found: ${selector}\n`);
-                process.exit(1);
-            }
-
-            // Take screenshot of the specific element
-            const element = await page.$(selector);
-
-            // Determine image format from file extension
-            const isJpeg = /\.jpe?g$/i.test(outFile);
-            const screenshotOptions = { path: outFile };
-
-            if (isJpeg) {
-                screenshotOptions.type = 'jpeg';
-                screenshotOptions.quality = quality;
-            }
-
-            await element.screenshot(screenshotOptions);
-
-            if (verbose) console.log(`Saved image to ${outFile}`);
-            await browser.close();
-        }
-
-    } catch (error) {
-        console.error(`Error: ${error.message}`);
-        await browser.close();
-        process.exit(1);
-    }
-}
-
-depict(url, outFile, selector, cssText);
+depict(url, {
+    output: argv.o || argv.output,
+    selector: argv.s || argv.selector,
+    width: argv.width,
+    height: argv.height,
+    delay: argv.delay,
+    timeout: argv.timeout * 1000,
+    waitForSelector: argv['wait-for-selector'],
+    css: argv.css,
+    hide: argv.hide,
+    quality: argv.quality,
+    verbose: argv.verbose
+}).catch(error => {
+    console.error(`Error: ${error.message}`);
+    process.exit(1);
+});

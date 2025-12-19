@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .content {
+            color: #666;
+            line-height: 1.6;
+        }
+        .hidden-element {
+            display: block;
+            color: red;
+            margin-top: 20px;
+        }
+        .wait-for-me {
+            color: green;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Page for Depict</h1>
+        <div class="content">
+            <p>This is a test page used for screenshot testing.</p>
+            <p>It contains various elements to test selectors.</p>
+        </div>
+        <div class="hidden-element">This should be hidden in some tests</div>
+        <div class="wait-for-me">Loaded!</div>
+    </div>
+    <script>
+        // Simulate delayed content loading
+        setTimeout(() => {
+            console.log('Page fully loaded');
+        }, 100);
+    </script>
+</body>
+</html>

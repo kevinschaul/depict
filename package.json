@@ -12,12 +12,25 @@
     "url": "https://github.com/kevinschaul/depict.git"
   },
   "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
   "bin": {
     "depict": "./src/depict.js"
   },
-  "preferGlobal": true,
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
+  },
   "dependencies": {
-    "yargs": "^17.7.2",
-    "puppeteer": "^24.15.1"
+    "puppeteer": "^24.15.1",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@vitest/ui": "^4.0.16",
+    "vitest": "^4.0.16"
   }
 }
