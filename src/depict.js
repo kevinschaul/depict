@@ -1,198 +1,219 @@
 #!/usr/bin/env node
 
-var child_process = require('child_process');
-var fs = require('fs');
-var optimist = require('optimist');
-var phantom = require('phantom');
-// http://phantomjs.org/api/command-line.html
-var phantomOptions = {
-    'web-security': 'false',
-    'ignore-ssl-errors': 'true'
-};
+import fs from 'fs';
+import optimist from 'optimist';
+import puppeteer from 'puppeteer';
 
-var argv = optimist
-.usage('Usage: depict URL OUT_FILE [OPTIONS]')
-.options('h', {
-    alias: 'help',
-    describe: 'Display help',
-    default: false
-})
-.options('s', {
-    alias: 'selector',
-    describe: 'CSS selector',
-    default: 'body'
-})
-.options('c', {
-    alias: 'css',
-    describe: 'CSS file to include in rendering',
-    default: false
-})
-.options('H', {
-    alias: 'hide-selector',
-    describe: 'Hide attributes of this selector before rendering.',
-    default: false
-})
-.options('w', {
-    alias: 'browser-width',
-    describe: 'Specify the desired browser width.',
-    default: 1440
-})
-.options('d', {
-    alias: 'delay',
-    describe: 'Specify a delay time, in milliseconds.',
-    default: 1000
-})
-.options('call-phantom', {
-    describe: 'Whether to wait for the target page to call `callPhantom()`.',
-    default: false
-})
-.options('call-phantom-timeout', {
-    describe: 'How long to wait for the target page to call `callPhantom()`, in seconds.',
-    default: 30
-})
-.check(function(argv) {
-    if (argv._.length !== 2) {
-        throw new Error('URL and OUT_FILE must be given.');
-        process.exit(1);
-    }
-    if (argv['call-phantom-timeout'] !== 30 && !argv['call-phantom']) {
-        throw new Error('--call-phantom-timeout requires --call-phantom');
-        process.exit(1);
-    }
-})
-.argv;
-
-if (argv.h || argv.help) return optimist.showHelp();
-
-// Append 'http://' if protocol not specified
-var url = argv._[0];
-if (!url.match(/^\w+:\/\//)) {
-    url = 'http://' + url;
-}
-
-var selector = argv.s || argv.selector;
-var out_file = argv._[1];
-
-var css_file = argv.c || argv.css;
-var css_text = '';
-if (css_file) {
-    css_file.split(',').forEach(function (css_path) {
-        css_text += fs.readFileSync(css_path.trim(), 'utf8')
+const argv = optimist
+    .usage('Usage: depict <URL> [options]')
+    .options('o', {
+        alias: 'output',
+        describe: 'Output file',
+        default: 'screenshot.png'
     })
+    .options('s', {
+        alias: 'selector',
+        describe: 'CSS selector',
+        default: 'body'
+    })
+    .options('width', {
+        describe: 'Viewport width',
+        default: 1440
+    })
+    .options('height', {
+        describe: 'Viewport height',
+        default: 900
+    })
+    .options('delay', {
+        describe: 'Wait before screenshot (milliseconds)',
+        default: 1000
+    })
+    .options('timeout', {
+        describe: 'Timeout in seconds (for page load and selector waiting)',
+        default: 30
+    })
+    .options('wait-for-selector', {
+        describe: 'Wait for CSS selector to exist before screenshot',
+        default: null
+    })
+    .options('css', {
+        describe: 'CSS file(s) to inject (comma-separated)',
+        default: null
+    })
+    .options('hide', {
+        describe: 'Hide element(s) before screenshot',
+        default: null
+    })
+    .options('quality', {
+        describe: 'JPEG quality (0-100, only for .jpg/.jpeg output)',
+        default: 90
+    })
+    .options('verbose', {
+        describe: 'Show detailed output',
+        default: false
+    })
+    .options('h', {
+        alias: 'help',
+        describe: 'Display help',
+        default: false
+    })
+    .check((argv) => {
+        if (argv._.length !== 1) {
+            throw new Error('URL must be provided.');
+        }
+    })
+    .argv;
+
+if (argv.h || argv.help) {
+    optimist.showHelp();
+    process.exit(0);
 }
 
-var hide_selector = argv.H || argv["hide-selector"];
-if (hide_selector) {
-    css_text += "\n\n " + hide_selector + " { display: none; }\n";
+// Prepend 'https://' if protocol not specified
+let url = argv._[0];
+if (!url.match(/^\w+:\/\//)) {
+    url = `https://${url}`;
 }
 
-var viewport_width = argv.w || argv['browser-width'];
-var delay_time = argv.d || argv['delay'];
+const selector = argv.s || argv.selector;
+const outFile = argv.o || argv.output;
+const quality = argv.quality;
 
-var callPhantom = argv['call-phantom'];
-var callPhantomTimeout = (argv['call-phantom-timeout'] || 30) * 1000;
+const cssFile = argv.css;
+let cssText = '';
+if (cssFile) {
+    cssFile.split(',').forEach((cssPath) => {
+        cssText += fs.readFileSync(cssPath.trim(), 'utf8');
+    });
+}
 
-var callPhantomTimeoutID;
-var hasTakenScreenshot = false;
+const hideSelector = argv.hide;
+if (hideSelector) {
+    cssText += `\n\n ${hideSelector} { display: none !important; }\n`;
+}
 
-function depict(url, out_file, selector, css_text) {
-    // phantomjs heavily relies on callback functions
+const viewportWidth = argv.width;
+const viewportHeight = argv.height;
+const delayTime = argv.delay;
+const timeout = argv.timeout * 1000;
 
-    var page;
-    var ph;
-    var response_code;
+const waitForSelector = argv['wait-for-selector'];
+const verbose = argv.verbose;
 
-    console.log('\nRequesting', url);
+async function depict(url, outFile, selector, cssText) {
+    if (verbose) console.log(`\nRequesting ${url}`);
 
-    phantom.create({parameters: phantomOptions}, createPage)
+    const browser = await puppeteer.launch({
+        args: ['--disable-web-security', '--ignore-certificate-errors']
+    });
 
-    function createPage(_ph) {
-        ph = _ph;
-        ph.createPage(openPage);
-    }
+    try {
+        const page = await browser.newPage();
 
-    function openPage(_page) {
-        page = _page;
-        page.set('onError', function() { return; });
-        page.onConsoleMessage = function (msg) { console.log(msg); };
+        // Set viewport size
+        await page.setViewport({
+            width: viewportWidth,
+            height: viewportHeight
+        });
 
-        page.set('onResourceReceived', function(response) {
-            // If this resource is the requested URL, save its response code
-            if (response.url === url && response.stage === 'end') {
-                response_code = response.status;
+        // Forward console messages from the page if verbose
+        if (verbose) {
+            page.on('console', (msg) => console.log(msg.text()));
+        } else {
+            page.on('console', () => {});
+        }
+
+        // Suppress errors
+        page.on('pageerror', () => {});
+
+        let responseCode;
+
+        // Track response code
+        page.on('response', (response) => {
+            if (response.url() === url) {
+                responseCode = response.status();
             }
         });
 
-        if (callPhantom) {
-            page.set('onCallback', function(data) {
-                // Ensure message sent was for depict
-                if (data.target === 'depict') {
-                    // Ensure status is ready
-                    if (data.status === 'ready') {
-                        scheduleRender();
-                    } else {
-                        process.stdout.write('callPhantom() did not have status of `ready`\n');
-                        ph.exit();
-                        process.exit(1);
-                    }
-                }
-            });
-        }
-        page.open(url, prepForRender);
-        page.set('viewportSize', {width: viewport_width, height: 900}); // The height isn't taken into account here but phantomjs requires an object with both a width and a height.
-    }
+        // Navigate to the page
+        const response = await page.goto(url, {
+            waitUntil: 'networkidle0',
+            timeout: timeout
+        });
 
-    function prepForRender(status) {
-        if (response_code >= 200 && response_code < 300 && status === 'success') {
-            if (callPhantom) {
-                callPhantomTimeoutID = setTimeout(function() {
-                    if (!hasTakenScreenshot) {
-                        process.stdout.write('callPhantom() was not called; depict timed out.\n');
-                        ph.exit();
-                        process.exit(1);
-                    }
-                }, callPhantomTimeout);
+        responseCode = response.status();
+
+        if (responseCode >= 200 && responseCode < 300) {
+            if (waitForSelector) {
+                // Wait for CSS selector to exist
+                try {
+                    await page.waitForSelector(waitForSelector, { timeout: timeout });
+                    await scheduleRender();
+                } catch (error) {
+                    process.stdout.write(`Selector not found within timeout: ${waitForSelector}\n`);
+                    await browser.close();
+                    process.exit(1);
+                }
             } else {
-                scheduleRender();
+                await scheduleRender();
             }
         } else {
-            ph.exit()
-            process.stdout.write('Page could not be loaded. Response code: ' + response_code + '\n');
+            await browser.close();
+            process.stdout.write(`Page could not be loaded. Response code: ${responseCode}\n`);
             process.exit(1);
         }
-    }
 
-    function scheduleRender() {
-        setTimeout(function(){
-            page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
-        }, delay_time);
-    }
-
-    function runInPhantomBrowser(selector, css_text) {
-        if (css_text) {
-            var style = document.createElement('style');
-            style.appendChild(document.createTextNode(css_text));
-            document.head.appendChild(style);
+        async function scheduleRender() {
+            setTimeout(async () => {
+                await renderImage();
+            }, delayTime);
         }
 
-        var element = document.querySelector(selector);
-        return element.getBoundingClientRect();
-    }
+        async function renderImage() {
+            // Inject CSS and get element bounding box
+            const rect = await page.evaluate((selector, cssText) => {
+                if (cssText) {
+                    const style = document.createElement('style');
+                    style.appendChild(document.createTextNode(cssText));
+                    document.head.appendChild(style);
+                }
 
-    function renderImage(rect) {
-        // Clear the phantom timeout
-        clearTimeout(callPhantomTimeoutID);
+                const element = document.querySelector(selector);
+                if (!element) {
+                    return null;
+                }
+                return element.getBoundingClientRect();
+            }, selector, cssText);
 
-        page.set('clipRect', rect);
-        page.render(out_file, cleanup);
+            if (!rect) {
+                await browser.close();
+                process.stdout.write(`Selector not found: ${selector}\n`);
+                process.exit(1);
+            }
 
-        hasTakenScreenshot = true;
-    }
+            // Take screenshot of the specific element
+            const element = await page.$(selector);
 
-    function cleanup() {
-        console.log('Saved imaged to', out_file);
-        ph.exit();
+            // Determine image format from file extension
+            const isJpeg = /\.jpe?g$/i.test(outFile);
+            const screenshotOptions = { path: outFile };
+
+            if (isJpeg) {
+                screenshotOptions.type = 'jpeg';
+                screenshotOptions.quality = quality;
+            }
+
+            await element.screenshot(screenshotOptions);
+
+            if (verbose) console.log(`Saved image to ${outFile}`);
+            await browser.close();
+        }
+
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+        await browser.close();
+        process.exit(1);
     }
 }
 
-depict(url, out_file, selector, css_text);
+depict(url, outFile, selector, cssText);

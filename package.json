@@ -11,13 +11,13 @@
     "type": "git",
     "url": "https://github.com/kevinschaul/depict.git"
   },
+  "type": "module",
   "bin": {
     "depict": "./src/depict.js"
   },
   "preferGlobal": true,
   "dependencies": {
     "optimist": "~0.6.0",
-    "phantom": "~1.0",
-    "phantomjs": "~2.1"
+    "puppeteer": "^24.15.1"
   }
 }
