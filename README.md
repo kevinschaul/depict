@@ -26,18 +26,19 @@ Or run with npx:
     Usage: depict <URL> [options]
 
     Options:
-      -o, --output <file>          Output file (default: screenshot.png)
-      -s, --selector <string>      CSS selector (default: "body")
-      --width <number>             Viewport width (default: 1440)
-      --height <number>            Viewport height (default: 900)
-      --delay <ms>                 Wait before screenshot in milliseconds (default: 1000)
-      --timeout <sec>              Timeout in seconds for page load and selector waiting (default: 30)
-      --wait-for-selector <sel>    Wait for CSS selector to exist before screenshot
-      --css <file>                 CSS file(s) to inject (comma-separated)
-      --hide <selector>            Hide element(s) before screenshot
-      --quality <number>           JPEG quality 0-100 (only for .jpg/.jpeg output, default: 90)
-      --verbose                    Show detailed output
-      -h, --help                   Display help
+          --version            Show version number
+      -o, --output             Output file (default: "screenshot.png")
+      -s, --selector           CSS selector (default: "body")
+          --width              Viewport width (default: 1440)
+          --height             Viewport height (default: 900)
+          --delay              Wait before screenshot in milliseconds (default: 1000)
+          --timeout            Timeout in seconds for page load and selector waiting (default: 30)
+          --wait-for-selector  Wait for CSS selector to exist before screenshot
+          --css                CSS file(s) to inject (comma-separated)
+          --hide               Hide element(s) before screenshot
+          --quality            JPEG quality (0-100, only for .jpg/.jpeg output, default: 90)
+          --verbose            Show detailed output
+      -h, --help               Show help
 
 ## Examples
 

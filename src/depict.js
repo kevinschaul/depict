@@ -1,73 +1,67 @@
 #!/usr/bin/env node
 
 import fs from 'fs';
-import optimist from 'optimist';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 import puppeteer from 'puppeteer';
 
-const argv = optimist
+const argv = yargs(hideBin(process.argv))
     .usage('Usage: depict <URL> [options]')
-    .options('o', {
+    .option('o', {
         alias: 'output',
         describe: 'Output file',
         default: 'screenshot.png'
     })
-    .options('s', {
+    .option('s', {
         alias: 'selector',
         describe: 'CSS selector',
         default: 'body'
     })
-    .options('width', {
+    .option('width', {
         describe: 'Viewport width',
         default: 1440
     })
-    .options('height', {
+    .option('height', {
         describe: 'Viewport height',
         default: 900
     })
-    .options('delay', {
+    .option('delay', {
         describe: 'Wait before screenshot (milliseconds)',
         default: 1000
     })
-    .options('timeout', {
+    .option('timeout', {
         describe: 'Timeout in seconds (for page load and selector waiting)',
         default: 30
     })
-    .options('wait-for-selector', {
+    .option('wait-for-selector', {
         describe: 'Wait for CSS selector to exist before screenshot',
         default: null
     })
-    .options('css', {
+    .option('css', {
         describe: 'CSS file(s) to inject (comma-separated)',
         default: null
     })
-    .options('hide', {
+    .option('hide', {
         describe: 'Hide element(s) before screenshot',
         default: null
     })
-    .options('quality', {
+    .option('quality', {
         describe: 'JPEG quality (0-100, only for .jpg/.jpeg output)',
         default: 90
     })
-    .options('verbose', {
+    .option('verbose', {
         describe: 'Show detailed output',
         default: false
     })
-    .options('h', {
-        alias: 'help',
-        describe: 'Display help',
-        default: false
-    })
+    .help('h')
+    .alias('h', 'help')
     .check((argv) => {
         if (argv._.length !== 1) {
             throw new Error('URL must be provided.');
         }
+        return true;
     })
     .argv;
-
-if (argv.h || argv.help) {
-    optimist.showHelp();
-    process.exit(0);
-}
 
 // Prepend 'https://' if protocol not specified
 let url = argv._[0];
